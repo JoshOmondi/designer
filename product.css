@@ -143,3 +143,8 @@ h1{
     background-color: rgb(132, 132, 143);
     color: black;
 }
+#product-image{
+    width: 100px;
+    height: 100px;
+    overflow: hidden;
+}

@@ -1,11 +1,40 @@
+// Create an empty cart array to store selected products
+const cart = [];
+
 // Fetch product data
 fetch("https://fakestoreapi.com/products")
   .then((res) => res.json())
   .then((products) => {
     const productsDiv = document.querySelector(".product-container");
     const categorySelect = document.getElementById("category");
+    const cartCount = document.getElementById("cart-count");
 
-    // Function to filter and display products based on the selected category
+    // Function to update the cart count
+    const updateCartCount = () => {
+      cartCount.textContent = cart.length;
+    };
+
+    // Function to handle the "Buy Now!" button click
+    const handleBuyButtonClick = (productDetails) => {
+      // Create an object to represent the selected product
+      const selectedProduct = {
+        title: productDetails.title,
+        price: productDetails.price,
+        image: productDetails.image,
+        description:productDetails.description,
+      };
+
+      // Add the selected product to the cart
+      cart.push(selectedProduct);
+
+      // Update the cart count
+      updateCartCount();
+
+      // Store the cart data in local storage for persistence
+      localStorage.setItem("cart", JSON.stringify(cart));
+    };
+
+    // Function to display products based on the selected category
     const displayProductsByCategory = (selectedCategory) => {
       // Clear the existing products in the container
       productsDiv.innerHTML = "";
@@ -22,11 +51,10 @@ fetch("https://fakestoreapi.com/products")
         // Create an object to hold the product details
         const productDetails = {
           title: product.title,
-          description:product.description,
+          description: product.description,
           image: product.image,
           price: product.price,
         };
-      
 
         const productCard = document.createElement("div");
         productCard.className = "product-card";
@@ -55,6 +83,11 @@ fetch("https://fakestoreapi.com/products")
         buyButton.classList.add("buy-button");
         buyButton.textContent = "Buy Now!";
 
+        // Add a click event listener to the "Buy Now!" button
+        buyButton.addEventListener("click", () => {
+          handleBuyButtonClick(productDetails);
+        });
+
         // Append elements to the product card
         productCard.appendChild(productTitle);
         productCard.appendChild(imageLink);
@@ -63,23 +96,8 @@ fetch("https://fakestoreapi.com/products")
 
         // Append the product card to the products container
         productsDiv.appendChild(productCard);
-
-          const productDetailsJSON = JSON.stringify(productDetails);
-
-          // Add a click event listener to the image
-          imageLink.addEventListener("click", function (event) {
-            // Prevent the default link behavior (to avoid navigating to the URL)
-            event.preventDefault();
-
-            // Store the product details in local storage
-            localStorage.setItem("productDetails", productDetailsJSON);
-
-            // Optionally, you can navigate to the specified URL if needed
-            window.location.href = imageLink.href;
-          });
       });
     };
-    console.log(products);
 
     // Event listener for the category select
     categorySelect.addEventListener("change", () => {
@@ -89,5 +107,12 @@ fetch("https://fakestoreapi.com/products")
 
     // Initial display of products (all categories)
     displayProductsByCategory("Category");
+
+    // Load the cart count from local storage if available
+    const savedCart = localStorage.getItem("cart");
+    if (savedCart) {
+      cart.push(...JSON.parse(savedCart));
+      updateCartCount();
+    }
   })
   .catch((error) => console.error("Error fetching data:", error));
